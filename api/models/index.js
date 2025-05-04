@@ -1,15 +1,18 @@
 import dbConfig from '../config/db.config.js';
 import { Sequelize } from 'sequelize';
 import User from './User.js';
+import pg from 'pg';
 
 const sequelize = new Sequelize(
     dbConfig.database,
     dbConfig.user,
     dbConfig.password,
+
     {
         host: dbConfig.host,
         dialect: dbConfig.dialect,
-        logging: false,
+        port: dbConfig.port,
+        dialectModule: pg,
         pool: {
             max: dbConfig.pool.max,
             min: dbConfig.pool.min,
