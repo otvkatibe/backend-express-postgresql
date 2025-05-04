@@ -19,7 +19,7 @@ app.use("/SecuredRoute", userRoute);
 app.use("/users", userRoute);
 
 app.get("/", (req, res) => {
-    res.send("EXPRESS BACKEND COM MONGODB");
+    res.send("EXPRESS BACKEND COM POSTGRESQL");
 });
 
 const PORT = process.env.PORT || 3000;
