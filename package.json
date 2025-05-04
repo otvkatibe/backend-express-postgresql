@@ -1,6 +1,6 @@
 {
   "name": "backend-express-mongodb",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Atividade avaliativa 01 - Backend em express com autenticação(JWT) e postgresql em produção",
   "main": "api/index.js",
   "type": "module",
