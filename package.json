@@ -2,10 +2,10 @@
   "name": "backend-express-mongodb",
   "version": "0.1.0",
   "description": "Atividade avaliativa 01 - Backend em express com autenticação(JWT) e postgresql em produção",
-  "main": "api/app.js",
+  "main": "api/index.js",
   "type": "module",
   "scripts": {
-    "startapp": "nodemon api/app.js",
+    "startapp": "nodemon api/index.js",
     "startdatabase": "docker-compose up -d",
     "stopdatabase": "docker-compose down",
     "generate-secret-key": "node -e \"console.log(require('crypto').randomBytes(32).toString('hex'))\""
