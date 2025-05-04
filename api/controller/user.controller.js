@@ -1,11 +1,11 @@
 import bcrypt from 'bcrypt';
-import User from '../models/User.js';
+import db from '../models/index.js';
 import jwt from 'jsonwebtoken';
 
 const register = async (req, res) => {
     console.log("Registering user:", req.body);
-    if (!req.body || !req.body.name || !req.body.email || !req.body.password) {
-        return res.status(400).json({ message: 'Name, email and password are required' });
+    if (!req.body || !req.body.username || !req.body.email || !req.body.password) {
+        return res.status(400).json({ message: 'username, email and password are required' });
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -20,14 +20,14 @@ const register = async (req, res) => {
         return res.status(400).json({ message: 'Invalid password format. Password must be at least 8 characters long and include at least one letter and one number.' });
     }
 
-    const { name, email, password } = req.body;
+    const { username, email, password } = req.body;
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
     try {
-        const savedUser = await User.create({
-            name,
+        const savedUser = await db.users.create({
+            username,
             email,
             password: hashedPassword,
         });
@@ -41,37 +41,37 @@ const register = async (req, res) => {
 
 const login = async (req, res) => {
     console.log("Logging in user:", req.body);
-    if (!req.body || !req.body.name || !req.body.password) {
-        return res.status(400).json({ message: 'Name, email and password are required' });
+    if (!req.body || !req.body.username || !req.body.password) {
+        return res.status(400).json({ message: 'username, email and password are required' });
     }
 
-    const { name, email, password } = req.body;
+    const { username, email, password } = req.body;
 
-    if ((!email && !name) || !password) {
-        console.log("Email or username, and password are required", email, name);
+    if ((!email && !username) || !password) {
+        console.log("Email or username, and password are required", email, username);
         return res.status(400).json({ message: 'Email and password are required' });
     }
 
     try {
-        const user = await User.findOne({ name }).select('+password');
+        const user = await db.users.findOne({ where : { username } });
         if (!user) {
-            console.log("User not found", user.name);
+            console.log("User not found", user.username);
             return res.status(404).json({ message: 'User not found' });
         }
 
         if (email && user.email !== email) {
-            console.log("Email does not match the registered email for this user:", user.name);
+            console.log("Email does not match the registered email for this user:", user.username);
             return res.status(401).json({ message: 'Invalid credentials' });
         }
 
         const isMatch = await bcrypt.compare(password, user.password);
         console.log("Password match:", isMatch);
         if (!isMatch) {
-            console.log("Invalid credentials", user.name);
+            console.log("Invalid credentials", user.username);
             return res.status(401).json({ message: 'Invalid credentials' });
         }
 
-        console.log("User logged in successfully", user.name);
+        console.log("User logged in successfully", user.username);
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
         res.status(200).json({ message: 'Login successful', token });
     } catch (error) {
@@ -83,7 +83,7 @@ const login = async (req, res) => {
 const getAllUsers = async (req, res) => {
     try {
         console.log("Fetching all users");
-        const users = await User.find();
+        const users = await db.users.find();
         if (!users || users.length === 0) {
             console.log("No users found");
             return res.status(404).json({ message: 'No users found' });

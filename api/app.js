@@ -1,10 +1,14 @@
-import dotenv from "dotenv";
 import express from "express";
-import db from "./database/configdb.js";
+import db from "./models/index.js";
 import userRoute from "./routes/user.route.js";
 
-dotenv.config();   
-db.connect();
+db.sequelize.sync()
+    .then(() => {
+        console.log("Database synchronized");
+    })
+    .catch((error) => {
+        console.error("Error synchronizing database:", error);
+    });
 
 const app = express();
 
