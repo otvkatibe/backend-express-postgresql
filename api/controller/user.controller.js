@@ -1,5 +1,5 @@
 import bcrypt from 'bcrypt';
-import db from '../models/index.js';
+import { getAllUsersService, findUserByUsername, createUser} from '../services/user.service.js';
 import jwt from 'jsonwebtoken';
 
 const register = async (req, res) => {
@@ -26,7 +26,7 @@ const register = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, salt);
 
     try {
-        const savedUser = await db.users.create({
+        const savedUser = await createUser({
             username,
             email,
             password: hashedPassword,
@@ -53,7 +53,7 @@ const login = async (req, res) => {
     }
 
     try {
-        const user = await db.users.findOne({ where : { username } });
+        const user = await findUserByUsername({ where : { username } });
         if (!user) {
             console.log("User not found", user.username);
             return res.status(404).json({ message: 'User not found' });
@@ -61,14 +61,14 @@ const login = async (req, res) => {
 
         if (email && user.email !== email) {
             console.log("Email does not match the registered email for this user:", user.username);
-            return res.status(401).json({ message: 'Invalid credentials' });
+            return res.status(401).json({ message: 'Invalid email' });
         }
 
         const isMatch = await bcrypt.compare(password, user.password);
         console.log("Password match:", isMatch);
         if (!isMatch) {
-            console.log("Invalid credentials", user.username);
-            return res.status(401).json({ message: 'Invalid credentials' });
+            console.log("Invalid password for this user", user.username);
+            return res.status(401).json({ message: 'Invalid password' });
         }
 
         console.log("User logged in successfully", user.username);
@@ -83,7 +83,7 @@ const login = async (req, res) => {
 const getAllUsers = async (req, res) => {
     try {
         console.log("Fetching all users");
-        const users = await db.users.find();
+        const users = await getAllUsersService(); // Corrigido para usar findAll()
         if (!users || users.length === 0) {
             console.log("No users found");
             return res.status(404).json({ message: 'No users found' });
